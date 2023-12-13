@@ -65,6 +65,14 @@ async function processSubElementsAndCreateItems(boardId, itemId) {
         }
 
         const { columnsData, subitemsData } = itemData;
+
+        // Verificar si el tipo de contrato es "Arriendo"
+        const contractTypeColumn = columnsData.find(cv => cv.id === 'estado_1');
+        if (!contractTypeColumn || contractTypeColumn.text !== 'Arriendo') {
+            console.log('Tipo de contrato no es Arriendo. Saliendo del proceso.');
+            return;
+        }
+
         let formattedLocation = '';
         const locationColumn = columnsData.find(cv => cv.id === 'ubicaci_n');
         if (locationColumn && locationColumn.text) {
@@ -84,6 +92,7 @@ async function processSubElementsAndCreateItems(boardId, itemId) {
             console.log('No subitems to process for this item.');
             return;
         }
+
 
         for (const subitem of subitemsData) {
             const subitemColumns = subitem.column_values;
@@ -122,6 +131,7 @@ async function processSubElementsAndCreateItems(boardId, itemId) {
                     texto3: unitNumber,
                     texto8: parkingSpaces,
                     texto70: storageUnits,
+                    estado_1: propertyType,
                 };
 
                 const newItemId = await createNewItemInOtherBoard(boardId, newItemName, newItemData, formattedLocation);
