@@ -91,6 +91,7 @@ async function processSubElementsAndCreateItems(boardId, itemId) {
         const unitNumber = columnsData.find(cv => cv.id === 'texto')?.text || '';
         const parkingSpaces = columnsData.find(cv => cv.id === 'texto4')?.text || '';
         const storageUnits = columnsData.find(cv => cv.id === 'texto2')?.text || '';
+        const startingDate = columnsData.find(cv => cv.id === 'fecha')?.text || '';
 
         let arrendadorData = {};
         let arrendatarioData = {};
@@ -141,7 +142,8 @@ async function processSubElementsAndCreateItems(boardId, itemId) {
                 texto3: unitNumber,
                 texto8: parkingSpaces,
                 texto70: storageUnits,
-                estado_1: propertyType
+                estado_1: propertyType,
+                fecha2: startingDate,
         };
 
         // Crear solo un nuevo ítem en el otro tablero
