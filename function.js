@@ -79,70 +79,80 @@ async function processSubElementsAndCreateItems(boardId, itemId) {
             const locationData = JSON.parse(locationColumn.value);
             if (locationData && 'lat' in locationData && 'lng' in locationData) {
                 formattedLocation = `${locationData.lat} ${locationData.lng}`;
-                console.log('Processing location data:', locationColumn);
-                address = locationData.address;
-                console.log('Processing address:', address);
                 if (locationData.address) {
                     formattedLocation += ` ${locationData.address}`;
                 }
             }
         }
 
-        if (!Array.isArray(subitemsData) || subitemsData.length === 0) {
-            console.log('No subitems to process for this item.');
-            return;
-        }
+        // Datos del contrato
+        const address = columnsData.find(cv => cv.id === 'ubicaci_n')?.text || '';
+        const propertyType = columnsData.find(cv => cv.id === 'estado_17')?.text || '';
+        const unitNumber = columnsData.find(cv => cv.id === 'texto')?.text || '';
+        const parkingSpaces = columnsData.find(cv => cv.id === 'texto4')?.text || '';
+        const storageUnits = columnsData.find(cv => cv.id === 'texto2')?.text || '';
 
+        let arrendadorData = {};
+        let arrendatarioData = {};
 
         for (const subitem of subitemsData) {
             const subitemColumns = subitem.column_values;
-            console.log('Subitem column values:', JSON.stringify(subitemColumns, null, 2));
             const signerTypeColumn = subitemColumns.find(column => column.id === 'reflejo_189');
 
-            if (signerTypeColumn && (signerTypeColumn.text === 'Arrendatario')) {
-                const name = subitemColumns.find(column => column.id === 'reflejo0')?.text || '';
-                const lastName = subitemColumns.find(column => column.id === 'reflejo')?.text || '';
-                const id = subitemColumns.find(column => column.id === 'reflejo_1')?.text || '';
-                const phone = subitemColumns.find(column => column.id === 'reflejo_2')?.text || '';
-                const email = subitemColumns.find(column => column.id === 'reflejo_3')?.text || '';
-                const comisionRate = subitemColumns.find(column => column.id === 'n_meros7')?.text || '';
-                const razonSocial = subitemColumns.find(column => column.id === 'texto2')?.text || '';
-                const rutRazonSocial = subitemColumns.find(column => column.id === 'texto1')?.text
-                const fullName = `${name} ${lastName}`;
-
-                const contractType = columnsData.find(cv => cv.id === 'estado_1')?.text || '';
-                const propertyType = columnsData.find(cv => cv.id === 'estado_17')?.text || '';
-                const unitNumber = columnsData.find(cv => cv.id === 'texto')?.text || '';
-                const parkingSpaces = columnsData.find(cv => cv.id === 'texto4')?.text || '';
-                const storageUnits = columnsData.find(cv => cv.id === 'texto2')?.text || '';
-                const rentalValue = columnsData.find(cv => cv.id === 'n_meros')?.text || '';
-                const notaryFee = columnsData.find(cv => cv.id === 'n_meros5')?.text || '';
-
-                const newItemName = `Check-in Propiedad: ${address}`;
-                const newItemData = {
-                    texto: name,
-                    texto1: lastName,
-                    texto7: id,
-                    texto5: razonSocial,
-                    texto30: rutRazonSocial,
-                    tel_fono: phone,
-                    correo_electr_nico: { email: email, text: email },
-                    ubicaci_n: formattedLocation,
-                    texto3: unitNumber,
-                    texto8: parkingSpaces,
-                    texto70: storageUnits,
-                    estado_1: propertyType,
+            if (signerTypeColumn && signerTypeColumn.text === 'Arrendador' && Object.keys(arrendadorData).length === 0) {
+                // Almacenar datos del primer arrendador
+                arrendadorData = {
+                    texto: subitemColumns.find(column => column.id === 'reflejo0')?.text || '',
+                    texto1: subitemColumns.find(column => column.id === 'reflejo')?.text || '',
+                    texto7: subitemColumns.find(column => column.id === 'reflejo_1')?.text || '',
+                    tel_fono: subitemColumns.find(column => column.id === 'reflejo_2')?.text || '',
+                    correo_electr_nico: { email: subitemColumns.find(column => column.id === 'reflejo_3')?.text || '', text: subitemColumns.find(column => column.id === 'reflejo_3')?.text || '' },
+                    texto5: subitemColumns.find(column => column.id === 'texto2')?.text || '',
+                    texto30: subitemColumns.find(column => column.id === 'texto1')?.text || ''
                 };
+            }
 
-                const newItemId = await createNewItemInOtherBoard(boardId, newItemName, newItemData, formattedLocation);
-                console.log('Processed subitem:', signerTypeColumn.text, '- New item created with ID:', newItemId);
+            if (signerTypeColumn && signerTypeColumn.text === 'Arrendatario' && Object.keys(arrendatarioData).length === 0) {
+                // Almacenar datos del primer arrendatario
+                arrendatarioData = {
+                    texto80: subitemColumns.find(column => column.id === 'reflejo0')?.text || '',
+                    texto0: subitemColumns.find(column => column.id === 'reflejo')?.text || '',
+                    texto6: subitemColumns.find(column => column.id === 'reflejo_1')?.text || '',
+                    tel_fono_1: subitemColumns.find(column => column.id === 'reflejo_2')?.text || '',
+                    email: { email: subitemColumns.find(column => column.id === 'reflejo_3')?.text || '', text: subitemColumns.find(column => column.id === 'reflejo_3')?.text || '' },
+                    texto2: subitemColumns.find(column => column.id === 'texto2')?.text || '',
+                    texto37: subitemColumns.find(column => column.id === 'texto1')?.text || ''
+                };
+                break; // Salir del bucle después de procesar el primer arrendatario
             }
         }
+
+        // Verificar si se encontraron datos tanto del arrendador como del arrendatario
+        if (Object.keys(arrendadorData).length === 0 || Object.keys(arrendatarioData).length === 0) {
+            console.log('Datos de arrendador o arrendatario no encontrados. Saliendo del proceso.');
+            return;
+        }
+
+        const newItemData = {
+            // Combina los datos del contrato, arrendatario y arrendador
+                ...arrendatarioData,
+                ...arrendadorData,
+                ubicaci_n: formattedLocation,
+                texto3: unitNumber,
+                texto8: parkingSpaces,
+                texto70: storageUnits,
+                estado_1: propertyType
+        };
+
+        // Crear solo un nuevo ítem en el otro tablero
+        await createNewItemInOtherBoard(boardId, `Check-in Propiedad: ${address}`, newItemData);
+
     } catch (error) {
         console.error('Error occurred while processing subitems and creating new items:', error);
         throw error;
     }
 }
+
 
 // Function to create a new item in a different board
 async function createNewItemInOtherBoard(boardId, name, data, formattedLocation) {
