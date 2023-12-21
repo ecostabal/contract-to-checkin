@@ -102,19 +102,6 @@ async function processSubElementsAndCreateItems(boardId, itemId) {
             if (signerTypeColumn && signerTypeColumn.text === 'Arrendador' && Object.keys(arrendadorData).length === 0) {
                 // Almacenar datos del primer arrendador
                 arrendadorData = {
-                    texto: subitemColumns.find(column => column.id === 'reflejo0')?.text || '',
-                    texto1: subitemColumns.find(column => column.id === 'reflejo')?.text || '',
-                    texto7: subitemColumns.find(column => column.id === 'reflejo_1')?.text || '',
-                    tel_fono: subitemColumns.find(column => column.id === 'reflejo_2')?.text || '',
-                    correo_electr_nico: { email: subitemColumns.find(column => column.id === 'reflejo_3')?.text || '', text: subitemColumns.find(column => column.id === 'reflejo_3')?.text || '' },
-                    texto5: subitemColumns.find(column => column.id === 'texto2')?.text || '',
-                    texto30: subitemColumns.find(column => column.id === 'texto1')?.text || ''
-                };
-            }
-
-            if (signerTypeColumn && signerTypeColumn.text === 'Arrendatario' && Object.keys(arrendatarioData).length === 0) {
-                // Almacenar datos del primer arrendatario
-                arrendatarioData = {
                     texto80: subitemColumns.find(column => column.id === 'reflejo0')?.text || '',
                     texto0: subitemColumns.find(column => column.id === 'reflejo')?.text || '',
                     texto6: subitemColumns.find(column => column.id === 'reflejo_1')?.text || '',
@@ -122,6 +109,19 @@ async function processSubElementsAndCreateItems(boardId, itemId) {
                     email: { email: subitemColumns.find(column => column.id === 'reflejo_3')?.text || '', text: subitemColumns.find(column => column.id === 'reflejo_3')?.text || '' },
                     texto2: subitemColumns.find(column => column.id === 'texto2')?.text || '',
                     texto37: subitemColumns.find(column => column.id === 'texto1')?.text || ''
+                };
+            }
+
+            if (signerTypeColumn && signerTypeColumn.text === 'Arrendatario' && Object.keys(arrendatarioData).length === 0) {
+                // Almacenar datos del primer arrendatario
+                arrendatarioData = {
+                    texto: subitemColumns.find(column => column.id === 'reflejo0')?.text || '',
+                    texto1: subitemColumns.find(column => column.id === 'reflejo')?.text || '',
+                    texto7: subitemColumns.find(column => column.id === 'reflejo_1')?.text || '',
+                    tel_fono: subitemColumns.find(column => column.id === 'reflejo_2')?.text || '',
+                    correo_electr_nico: { email: subitemColumns.find(column => column.id === 'reflejo_3')?.text || '', text: subitemColumns.find(column => column.id === 'reflejo_3')?.text || '' },
+                    texto5: subitemColumns.find(column => column.id === 'texto2')?.text || '',
+                    texto30: subitemColumns.find(column => column.id === 'texto1')?.text || ''
                 };
                 break; // Salir del bucle después de procesar el primer arrendatario
             }
